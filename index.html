@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football AI Predictor Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1a3a5f;
+            --secondary: #2a5a8c;
+            --accent: #00c853;
+            --danger: #ff3860;
+            --warning: #ffab00;
+            --dark: #f5f5f5;
+            --light: #ffffff;
+            --text: #333333;
+            --card-bg: #ffffff;
+            --card-border: #e0e0e0;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+        
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+        }
+        
+        .ai-badge {
+            background: linear-gradient(45deg, #ff0080, #7928ca);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        
+        .prediction-win {
+            background-color: rgba(0, 200, 83, 0.1);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .prediction-loss {
+            background-color: rgba(255, 56, 96, 0.1);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .league-logo {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        .team-logo {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+        }
+        
+        .ai-agent {
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .progress {
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+        }
+        
+        .prediction-accuracy {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .scraper-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .online {
+            background-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+        
+        .offline {
+            background-color: var(--danger);
+        }
+        
+        .dashboard-widget {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            height: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+        
+        .dashboard-widget h5 {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .dashboard-widget .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .match-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+        
+        .match-card:hover {
+            background: rgba(240, 248, 255, 0.9);
+        }
+        
+        .prediction-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .win-badge {
+            background-color: rgba(0, 200, 83, 0.2);
+            color: var(--accent);
+        }
+        
+        .loss-badge {
+            background-color: rgba(255, 56, 96, 0.2);
+            color: var(--danger);
+        }
+        
+        .draw-badge {
+            background-color: rgba(255, 171, 0, 0.2);
+            color: var(--warning);
+        }
+        
+        .ai-processing {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .feature-list li {
+            margin-bottom: 10px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .team-management-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .team-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .team-item:last-child {
+            border-bottom: none;
+        }
+        
+        .form-section {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .prediction-accuracy {
+                font-size: 1.8rem;
+            }
+            
+            .dashboard-widget .value {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-futbol me-2"></i>
+                <strong>Football AI Predictor Pro</strong>
+                <span class="ai-badge">AI POWERED</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-section="dashboard"><i class="fas fa-home me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="predictions"><i class="fas fa-tachometer-alt me-1"></i> Predictions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="data-management"><i class="fas fa-database me-1"></i> Data Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="team-management"><i class="fas fa-users me-1"></i> Team Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="ai-agents"><i class="fas fa-robot me-1"></i> AI Agents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="analytics"><i class="fas fa-chart-bar me-1"></i> Analytics</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light me-2" id="refreshDataBtn"><i class="fas fa-sync-alt me-1"></i> Refresh Data</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMatchModal"><i class="fas fa-plus me-1"></i> Add Match</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>PREDICTION ACCURACY</h5>
+                        <div class="prediction-accuracy text-success">78.3%</div>
+                        <div class="text-center">Last 30 days</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>ACTIVE AI AGENTS</h5>
+                        <div class="value">12</div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>DATA SOURCES</h5>
+                        <div class="value">9/10</div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-warning" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>PROFIT MARGIN</h5>
+                        <div class="value text-success">+14.2%</div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-success" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Today's Predictions -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-list-alt me-2"></i> Today's AI Predictions</span>
+                            <div>
+                                <span class="me-3"><span class="scraper-status online"></span> Live Updates</span>
+                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-filter me-1"></i> Filter</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Match Prediction 1 -->
+                            <div class="match-card prediction-win">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png" class="team-logo" alt="Man City">
+                                            <span>Manchester City</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png" class="team-logo" alt="Man Utd">
+                                            <span>Manchester United</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <div class="fw-bold">Premier League</div>
+                                        <small>19:45 Today</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>AI Prediction:</span>
+                                            <span class="fw-bold">Home Win</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>BTTS Probability:</span>
+                                            <span class="fw-bold">68%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Confidence:</span>
+                                            <span class="fw-bold text-success">84%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex">
+                                            <span class="prediction-badge win-badge me-2">1.45</span>
+                                            <span class="prediction-badge loss-badge me-2">4.20</span>
+                                            <span class="prediction-badge draw-badge">3.10</span>
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="prediction-badge win-badge">BTTS: Yes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Match Prediction 2 -->
+                            <div class="match-card prediction-loss">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png" class="team-logo" alt="Real Madrid">
+                                            <span>Real Madrid</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png" class="team-logo" alt="Barcelona">
+                                            <span>Barcelona</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <div class="fw-bold">La Liga</div>
+                                        <small>21:00 Today</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>AI Prediction:</span>
+                                            <span class="fw-bold">Draw</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>BTTS Probability:</span>
+                                            <span class="fw-bold">72%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Confidence:</span>
+                                            <span class="fw-bold text-warning">63%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex">
+                                            <span class="prediction-badge loss-badge me-2">2.10</span>
+                                            <span class="prediction-badge win-badge me-2">3.25</span>
+                                            <span class="prediction-badge draw-badge">2.80</span>
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="prediction-badge win-badge">BTTS: Yes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <!-- Quick Actions -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-bolt me-2"></i> Quick Actions
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+                                    <i class="fas fa-plus me-1"></i> Add New Team
+                                </button>
+                                <button class="btn btn-outline-primary" data-section="predictions">
+                                    <i class="fas fa-tachometer-alt me-1"></i> View All Predictions
+                                </button>
+                                <button class="btn btn-outline-primary" data-section="analytics">
+                                    <i class="fas fa-chart-bar me-1"></i> View Analytics
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Matches -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar me-2"></i> Upcoming Featured Matches
+                        </div>
+                        <div class="card-body">
+                            <div class="match-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">Champions League</div>
+                                        <small>Tomorrow, 20:00</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div>Bayern vs PSG</div>
+                                        <span class="badge bg-primary">AI Analysis Ready</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="match-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">Premier League</div>
+                                        <small>Tomorrow, 19:30</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div>Arsenal vs Liverpool</div>
+                                        <span class="badge bg-primary">AI Analysis Ready</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictions Section -->
+        <div id="predictions" class="content-section">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-tachometer-alt me-2"></i> All AI Predictions</span>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-download me-1"></i> Export</button>
+                        <button class="btn btn-sm btn-primary"><i class="fas fa-filter me-1"></i> Filter Predictions</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Match</th>
+                                    <th>League</th>
+                                    <th>Date & Time</th>
+                                    <th>AI Prediction</th>
+                                    <th>Confidence</th>
+                                    <th>BTTS</th>
+                                    <th>Odds</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="predictionsTable">
+                                <!-- Predictions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management Section -->
+        <div id="data-management" class="content-section">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-database me-2"></i> Data Sources Status
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>Football Stats API</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>189Score</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>SofaScore</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>Hollywoodbets</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>Betway</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status offline"></span>
+                                    <span>Transfermarkt</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-danger">Offline</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>Weather API</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                <div>
+                                    <span class="scraper-status online"></span>
+                                    <span>Injury Data API</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">Live</span>
+                                    <button class="btn btn-sm btn-outline-primary ms-2">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-sync-alt me-2"></i> Data Refresh Settings
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Auto-refresh Interval</label>
+                                <select class="form-select" id="refreshInterval">
+                                    <option value="5">5 minutes</option>
+                                    <option value="15" selected>15 minutes</option>
+                                    <option value="30">30 minutes</option>
+                                    <option value="60">1 hour</option>
+                                </select>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                                <label class="form-check-label" for="autoRefresh">Enable Auto-refresh</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Last Data Refresh</label>
+                                <div class="form-control" id="lastRefreshTime">Just now</div>
+                            </div>
+                            <button class="btn btn-primary w-100" id="manualRefreshBtn">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh Data Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Management Section -->
+        <div id="team-management" class="content-section">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-users me-2"></i> Team Management</span>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+                        <i class="fas fa-plus me-1"></i> Add Team
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="teamSearch" placeholder="Search teams...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="leagueFilter">
+                                <option value="">All Leagues</option>
+                                <option value="Premier League">Premier League</option>
+                                <option value="La Liga">La Liga</option>
+                                <option value="Serie A">Serie A</option>
+                                <option value="Bundesliga">Bundesliga</option>
+                                <option value="Ligue 1">Ligue 1</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="countryFilter">
+                                <option value="">All Countries</option>
+                                <option value="England">England</option>
+                                <option value="Spain">Spain</option>
+                                <option value="Italy">Italy</option>
+                                <option value="Germany">Germany</option>
+                                <option value="France">France</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="teamsList" class="row">
+                        <!-- Teams will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Agents Section -->
+        <div id="ai-agents" class="content-section">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-robot me-2"></i> Active AI Agents
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="ai-agent">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Performance Analyzer</h5>
+                                        <small class="text-muted">Team & Player Stats</small>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <span class="badge bg-success">Online</span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-info" style="width: 85%"></div>
+                                </div>
+                                <small>Processing: Player form analysis</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ai-agent">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-user-injured"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Injury Predictor</h5>
+                                        <small class="text-muted">Fitness & Availability</small>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <span class="badge bg-success">Online</span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-warning" style="width: 65%"></div>
+                                </div>
+                                <small>Processing: Injury risk assessment</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ai-agent">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-cloud-sun-rain"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Weather Impact Analyzer</h5>
+                                        <small class="text-muted">Pitch & Conditions</small>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <span class="badge bg-success">Online</span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" style="width: 45%"></div>
+                                </div>
+                                <small>Processing: Weather impact models</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ai-agent">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">Referee Bias Analyzer</h5>
+                                        <small class="text-muted">Officiating Patterns</small>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <span class="badge bg-success">Online</span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-primary" style="width: 72%"></div>
+                                </div>
+                                <small>Processing: Referee decision patterns</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-cogs me-2"></i> AI Model Training
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Model Performance</h5>
+                            <div class="chart-container">
+                                <canvas id="modelPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Training Status</h5>
+                            <div class="mb-3">
+                                <label>Current Epoch: <span id="currentEpoch">245</span>/500</label>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" style="width: 49%">49%</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Training Accuracy: <span id="trainingAccuracy">87.3%</span></label>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" style="width: 87%">87%</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Validation Accuracy: <span id="validationAccuracy">82.1%</span></label>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-info" style="width: 82%">82%</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-3">
+                                <i class="fas fa-play me-1"></i> Start Training Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="content-section">
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>PREDICTION ACCURACY</h5>
+                        <div class="prediction-accuracy text-success">78.3%</div>
+                        <div class="text-center">Last 30 days</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>PROFIT MARGIN</h5>
+                        <div class="value text-success">+14.2%</div>
+                        <div class="text-center">Since last month</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>PREDICTIONS MADE</h5>
+                        <div class="value">1,247</div>
+                        <div class="text-center">This season</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="dashboard-widget card">
+                        <h5>SUCCESS RATE</h5>
+                        <div class="value text-success">72.8%</div>
+                        <div class="text-center">BTTS Predictions</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line me-2"></i> Prediction Performance Over Time
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-chart-pie me-2"></i> Prediction Distribution
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-trophy me-2"></i> Best Performing Leagues
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="leaguesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar me-2"></i> Monthly Performance
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Team Modal -->
+    <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTeamModalLabel">Add New Team</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTeamForm">
+                        <div class="mb-3">
+                            <label for="teamName" class="form-label">Team Name *</label>
+                            <input type="text" class="form-control" id="teamName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamCountry" class="form-label">Country *</label>
+                            <select class="form-select" id="teamCountry" required>
+                                <option value="">Select Country</option>
+                                <option value="England">England</option>
+                                <option value="Spain">Spain</option>
+                                <option value="Italy">Italy</option>
+                                <option value="Germany">Germany</option>
+                                <option value="France">France</option>
+                                <option value="Netherlands">Netherlands</option>
+                                <option value="Portugal">Portugal</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamLeague" class="form-label">League *</label>
+                            <select class="form-select" id="teamLeague" required>
+                                <option value="">Select a league</option>
+                                <option value="Premier League">Premier League</option>
+                                <option value="La Liga">La Liga</option>
+                                <option value="Serie A">Serie A</option>
+                                <option value="Bundesliga">Bundesliga</option>
+                                <option value="Ligue 1">Ligue 1</option>
+                                <option value="Eredivisie">Eredivisie</option>
+                                <option value="Primeira Liga">Primeira Liga</option>
+                                <option value="Champions League">Champions League</option>
+                                <option value="Europa League">Europa League</option>
+                                <option value="Women's Super League">Women's Super League</option>
+                                <option value="Frauen-Bundesliga">Frauen-Bundesliga</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamLogo" class="form-label">Team Logo URL</label>
+                            <input type="url" class="form-control" id="teamLogo" placeholder="https://example.com/logo.png">
+                            <div class="form-text">Leave empty to use a default logo</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveTeamBtn">Save Team</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Match Modal -->
+    <div class="modal fade" id="addMatchModal" tabindex="-1" aria-labelledby="addMatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMatchModalLabel">Add New Match</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMatchForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="homeTeam" class="form-label">Home Team *</label>
+                                    <select class="form-select" id="homeTeam" required>
+                                        <option value="">Select Home Team</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="awayTeam" class="form-label">Away Team *</label>
+                                    <select class="form-select" id="awayTeam" required>
+                                        <option value="">Select Away Team</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="matchLeague" class="form-label">League *</label>
+                                    <select class="form-select" id="matchLeague" required>
+                                        <option value="">Select League</option>
+                                        <option value="Premier League">Premier League</option>
+                                        <option value="La Liga">La Liga</option>
+                                        <option value="Serie A">Serie A</option>
+                                        <option value="Bundesliga">Bundesliga</option>
+                                        <option value="Ligue 1">Ligue 1</option>
+                                        <option value="Champions League">Champions League</option>
+                                        <option value="Europa League">Europa League</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="matchDate" class="form-label">Match Date & Time *</label>
+                                    <input type="datetime-local" class="form-control" id="matchDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">AI Analysis Parameters</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="analyzeInjuries" checked>
+                                <label class="form-check-label" for="analyzeInjuries">
+                                    Include injury analysis
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="analyzeWeather" checked>
+                                <label class="form-check-label" for="analyzeWeather">
+                                    Include weather conditions
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="analyzeReferee" checked>
+                                <label class="form-check-label" for="analyzeReferee">
+                                    Include referee bias analysis
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveMatchBtn">Generate Prediction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Football AI Predictor Pro</h5>
+                    <p>The most advanced AI-powered football prediction platform. Using synthetic intelligence and multiple data sources for accurate match predictions.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light" data-section="dashboard">Dashboard</a></li>
+                        <li><a href="#" class="text-light" data-section="predictions">Predictions</a></li>
+                        <li><a href="#" class="text-light" data-section="data-management">Data Management</a></li>
+                        <li><a href="#" class="text-light" data-section="team-management">Team Management</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Connect</h6>
+                    <div class="d-flex">
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-github fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <small>&copy; 2023 Football AI Predictor Pro. All rights reserved. | This is a demonstration interface.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Application state and data
+        const appState = {
+            teams: [],
+            predictions: [],
+            currentSection: 'dashboard',
+            lastRefresh: new Date()
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadInitialData();
+            
+            // Set up navigation
+            setupNavigation();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Set up auto-refresh
+            setupAutoRefresh();
+        });
+
+        // Load initial data from localStorage or use defaults
+        function loadInitialData() {
+            // Load teams
+            const savedTeams = localStorage.getItem('teams');
+            if (savedTeams) {
+                appState.teams = JSON.parse(savedTeams);
+            } else {
+                // Default teams
+                appState.teams = [
+                    { 
+                        id: 1, 
+                        name: 'Manchester City', 
+                        country: 'England', 
+                        league: 'Premier League', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png' 
+                    },
+                    { 
+                        id: 2, 
+                        name: 'Manchester United', 
+                        country: 'England', 
+                        league: 'Premier League', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png' 
+                    },
+                    { 
+                        id: 3, 
+                        name: 'Real Madrid', 
+                        country: 'Spain', 
+                        league: 'La Liga', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png' 
+                    },
+                    { 
+                        id: 4, 
+                        name: 'Barcelona', 
+                        country: 'Spain', 
+                        league: 'La Liga', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png' 
+                    },
+                    { 
+                        id: 5, 
+                        name: 'Bayern Munich', 
+                        country: 'Germany', 
+                        league: 'Bundesliga', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png' 
+                    },
+                    { 
+                        id: 6, 
+                        name: 'PSG', 
+                        country: 'France', 
+                        league: 'Ligue 1', 
+                        logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png' 
+                    }
+                ];
+                localStorage.setItem('teams', JSON.stringify(appState.teams));
+            }
+            
+            // Load predictions
+            const savedPredictions = localStorage.getItem('predictions');
+            if (savedPredictions) {
+                appState.predictions = JSON.parse(savedPredictions);
+            } else {
+                // Default predictions
+                appState.predictions = [
+                    {
+                        id: 1,
+                        homeTeam: 'Manchester City',
+                        awayTeam: 'Manchester United',
+                        league: 'Premier League',
+                        date: '2023-10-29T19:45:00',
+                        prediction: 'Home Win',
+                        confidence: 84,
+                        btts: 'Yes',
+                        homeOdds: 1.45,
+                        drawOdds: 3.10,
+                        awayOdds: 4.20,
+                        status: 'Pending'
+                    },
+                    {
+                        id: 2,
+                        homeTeam: 'Real Madrid',
+                        awayTeam: 'Barcelona',
+                        league: 'La Liga',
+                        date: '2023-10-29T21:00:00',
+                        prediction: 'Draw',
+                        confidence: 63,
+                        btts: 'Yes',
+                        homeOdds: 2.10,
+                        drawOdds: 2.80,
+                        awayOdds: 3.25,
+                        status: 'Pending'
+                    }
+                ];
+                localStorage.setItem('predictions', JSON.stringify(appState.predictions));
+            }
+            
+            // Update UI with loaded data
+            renderTeams();
+            renderPredictionsTable();
+            populateTeamSelects();
+        }
+
+        // Set up navigation between sections
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link[data-section]');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetSection = this.getAttribute('data-section');
+                    
+                    // Update active nav link
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show target section
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(targetSection).classList.add('active');
+                    
+                    // Update app state
+                    appState.currentSection = targetSection;
+                    
+                    // Special handling for certain sections
+                    if (targetSection === 'analytics') {
+                        updateAnalyticsCharts();
+                    }
+                });
+            });
+            
+            // Quick action buttons
+            const quickActionButtons = document.querySelectorAll('button[data-section]');
+            quickActionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetSection = this.getAttribute('data-section');
+                    const navLink = document.querySelector(`.nav-link[data-section="${targetSection}"]`);
+                    if (navLink) {
+                        navLink.click();
+                    }
+                });
+            });
+        }
+
+        // Set up event listeners for various interactions
+        function setupEventListeners() {
+            // Save team button
+            document.getElementById('saveTeamBtn').addEventListener('click', function() {
+                const teamName = document.getElementById('teamName').value;
+                const teamCountry = document.getElementById('teamCountry').value;
+                const teamLeague = document.getElementById('teamLeague').value;
+                const teamLogo = document.getElementById('teamLogo').value;
+                
+                if (teamName && teamCountry && teamLeague) {
+                    addTeam(teamName, teamCountry, teamLeague, teamLogo);
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTeamModal'));
+                    modal.hide();
+                    // Reset form
+                    document.getElementById('addTeamForm').reset();
+                } else {
+                    alert('Please fill in all required fields');
+                }
+            });
+            
+            // Save match button
+            document.getElementById('saveMatchBtn').addEventListener('click', function() {
+                const homeTeam = document.getElementById('homeTeam').value;
+                const awayTeam = document.getElementById('awayTeam').value;
+                const matchLeague = document.getElementById('matchLeague').value;
+                const matchDate = document.getElementById('matchDate').value;
+                
+                if (homeTeam && awayTeam && matchLeague && matchDate) {
+                    addMatchPrediction(homeTeam, awayTeam, matchLeague, matchDate);
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addMatchModal'));
+                    modal.hide();
+                    // Reset form
+                    document.getElementById('addMatchForm').reset();
+                } else {
+                    alert('Please fill in all required fields');
+                }
+            });
+            
+            // Refresh data button
+            document.getElementById('refreshDataBtn').addEventListener('click', refreshData);
+            document.getElementById('manualRefreshBtn').addEventListener('click', refreshData);
+            
+            // Team search and filters
+            document.getElementById('teamSearch').addEventListener('input', filterTeams);
+            document.getElementById('leagueFilter').addEventListener('change', filterTeams);
+            document.getElementById('countryFilter').addEventListener('change', filterTeams);
+            
+            // Simulate AI processing animation
+            const aiAgents = document.querySelectorAll('.ai-agent');
+            
+            aiAgents.forEach(agent => {
+                const progressBar = agent.querySelector('.progress-bar');
+                const randomWidth = Math.floor(Math.random() * 30) + 40;
+                progressBar.style.width = `${randomWidth}%`;
+                
+                // Simulate processing animation
+                setInterval(() => {
+                    const currentWidth = parseInt(progressBar.style.width);
+                    const newWidth = Math.min(100, currentWidth + Math.random() * 5);
+                    progressBar.style.width = `${newWidth}%`;
+                    
+                    if (newWidth >= 95) {
+                        progressBar.style.width = '40%';
+                    }
+                }, 3000);
+            });
+            
+            // Update scraper status randomly
+            setInterval(() => {
+                const statuses = document.querySelectorAll('.scraper-status');
+                statuses.forEach(status => {
+                    if (Math.random() > 0.1) { // 90% chance to be online
+                        status.classList.remove('offline');
+                        status.classList.add('online');
+                    } else {
+                        status.classList.remove('online');
+                        status.classList.add('offline');
+                    }
+                });
+            }, 5000);
+        }
+
+        // Team management functions
+        function renderTeams() {
+            const teamsList = document.getElementById('teamsList');
+            teamsList.innerHTML = '';
+            
+            if (appState.teams.length === 0) {
+                teamsList.innerHTML = '<div class="col-12 text-center py-4"><p>No teams added yet. Click "Add Team" to get started.</p></div>';
+                return;
+            }
+            
+            appState.teams.forEach(team => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'col-md-6 col-lg-4 mb-3';
+                teamCard.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="${team.logo}" class="team-logo" alt="${team.name}" onerror="this.src='https://via.placeholder.com/50x50/1a3a5f/ffffff?text=${team.name.substring(0,2)}'">
+                                <h5 class="card-title mb-0">${team.name}</h5>
+                            </div>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-trophy me-1"></i> ${team.league}<br>
+                                    <i class="fas fa-flag me-1"></i> ${team.country}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editTeam(${team.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeTeam(${team.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                teamsList.appendChild(teamCard);
+            });
+        }
+
+        function addTeam(name, country, league, logo) {
+            // Default logo if none provided
+            if (!logo) {
+                const initials = name.split(' ').map(word => word[0]).join('').substring(0, 2);
+                logo = `https://via.placeholder.com/50x50/1a3a5f/ffffff?text=${initials}`;
+            }
+            
+            const newTeam = {
+                id: Date.now(), // Simple ID generation
+                name: name,
+                country: country,
+                league: league,
+                logo: logo
+            };
+            
+            // Add to teams array
+            appState.teams.push(newTeam);
+            
+            // Save to localStorage
+            localStorage.setItem('teams', JSON.stringify(appState.teams));
+            
+            // Update UI
+            renderTeams();
+            populateTeamSelects();
+            
+            // Show success message
+            showNotification(`Team "${name}" added successfully!`, 'success');
+        }
+
+        function removeTeam(teamId) {
+            if (confirm('Are you sure you want to remove this team?')) {
+                // Filter out the team to remove
+                appState.teams = appState.teams.filter(team => team.id !== teamId);
+                
+                // Save to localStorage
+                localStorage.setItem('teams', JSON.stringify(appState.teams));
+                
+                // Update UI
+                renderTeams();
+                populateTeamSelects();
+                
+                // Show success message
+                showNotification('Team removed successfully!', 'success');
+            }
+        }
+
+        function editTeam(teamId) {
+            // Find the team
+            const team = appState.teams.find(t => t.id === teamId);
+            if (!team) return;
+            
+            // Populate the form
+            document.getElementById('teamName').value = team.name;
+            document.getElementById('teamCountry').value = team.country;
+            document.getElementById('teamLeague').value = team.league;
+            document.getElementById('teamLogo').value = team.logo;
+            
+            // Change modal title and button
+            document.getElementById('addTeamModalLabel').textContent = 'Edit Team';
+            document.getElementById('saveTeamBtn').textContent = 'Update Team';
+            document.getElementById('saveTeamBtn').onclick = function() {
+                updateTeam(teamId);
+            };
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('addTeamModal'));
+            modal.show();
+        }
+
+        function updateTeam(teamId) {
+            const teamName = document.getElementById('teamName').value;
+            const teamCountry = document.getElementById('teamCountry').value;
+            const teamLeague = document.getElementById('teamLeague').value;
+            const teamLogo = document.getElementById('teamLogo').value;
+            
+            if (teamName && teamCountry && teamLeague) {
+                // Find and update the team
+                const teamIndex = appState.teams.findIndex(t => t.id === teamId);
+                if (teamIndex !== -1) {
+                    appState.teams[teamIndex].name = teamName;
+                    appState.teams[teamIndex].country = teamCountry;
+                    appState.teams[teamIndex].league = teamLeague;
+                    appState.teams[teamIndex].logo = teamLogo || appState.teams[teamIndex].logo;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('teams', JSON.stringify(appState.teams));
+                    
+                    // Update UI
+                    renderTeams();
+                    populateTeamSelects();
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTeamModal'));
+                    modal.hide();
+                    
+                    // Reset form and button
+                    document.getElementById('addTeamForm').reset();
+                    document.getElementById('addTeamModalLabel').textContent = 'Add New Team';
+                    document.getElementById('saveTeamBtn').textContent = 'Save Team';
+                    document.getElementById('saveTeamBtn').onclick = function() {
+                        const teamName = document.getElementById('teamName').value;
+                        const teamCountry = document.getElementById('teamCountry').value;
+                        const teamLeague = document.getElementById('teamLeague').value;
+                        const teamLogo = document.getElementById('teamLogo').value;
+                        
+                        if (teamName && teamCountry && teamLeague) {
+                            addTeam(teamName, teamCountry, teamLeague, teamLogo);
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('addTeamModal'));
+                            modal.hide();
+                            document.getElementById('addTeamForm').reset();
+                        } else {
+                            alert('Please fill in all required fields');
+                        }
+                    };
+                    
+                    // Show success message
+                    showNotification(`Team "${teamName}" updated successfully!`, 'success');
+                }
+            } else {
+                alert('Please fill in all required fields');
+            }
+        }
+
+        function filterTeams() {
+            const searchTerm = document.getElementById('teamSearch').value.toLowerCase();
+            const leagueFilter = document.getElementById('leagueFilter').value;
+            const countryFilter = document.getElementById('countryFilter').value;
+            
+            const filteredTeams = appState.teams.filter(team => {
+                const matchesSearch = team.name.toLowerCase().includes(searchTerm);
+                const matchesLeague = !leagueFilter || team.league === leagueFilter;
+                const matchesCountry = !countryFilter || team.country === countryFilter;
+                
+                return matchesSearch && matchesLeague && matchesCountry;
+            });
+            
+            const teamsList = document.getElementById('teamsList');
+            teamsList.innerHTML = '';
+            
+            if (filteredTeams.length === 0) {
+                teamsList.innerHTML = '<div class="col-12 text-center py-4"><p>No teams match your filters.</p></div>';
+                return;
+            }
+            
+            filteredTeams.forEach(team => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'col-md-6 col-lg-4 mb-3';
+                teamCard.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="${team.logo}" class="team-logo" alt="${team.name}" onerror="this.src='https://via.placeholder.com/50x50/1a3a5f/ffffff?text=${team.name.substring(0,2)}'">
+                                <h5 class="card-title mb-0">${team.name}</h5>
+                            </div>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-trophy me-1"></i> ${team.league}<br>
+                                    <i class="fas fa-flag me-1"></i> ${team.country}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editTeam(${team.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeTeam(${team.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                teamsList.appendChild(teamCard);
+            });
+        }
+
+        function populateTeamSelects() {
+            const homeTeamSelect = document.getElementById('homeTeam');
+            const awayTeamSelect = document.getElementById('awayTeam');
+            
+            // Clear existing options except the first one
+            while (homeTeamSelect.options.length > 1) {
+                homeTeamSelect.remove(1);
+            }
+            while (awayTeamSelect.options.length > 1) {
+                awayTeamSelect.remove(1);
+            }
+            
+            // Add teams to selects
+            appState.teams.forEach(team => {
+                const homeOption = document.createElement('option');
+                homeOption.value = team.name;
+                homeOption.textContent = team.name;
+                homeTeamSelect.appendChild(homeOption);
+                
+                const awayOption = document.createElement('option');
+                awayOption.value = team.name;
+                awayOption.textContent = team.name;
+                awayTeamSelect.appendChild(awayOption);
+            });
+        }
+
+        // Prediction management functions
+        function renderPredictionsTable() {
+            const predictionsTable = document.getElementById('predictionsTable');
+            predictionsTable.innerHTML = '';
+            
+            if (appState.predictions.length === 0) {
+                predictionsTable.innerHTML = '<tr><td colspan="8" class="text-center py-4">No predictions available.</td></tr>';
+                return;
+            }
+            
+            appState.predictions.forEach(prediction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="${getTeamLogo(prediction.homeTeam)}" class="team-logo me-1" alt="${prediction.homeTeam}" onerror="this.src='https://via.placeholder.com/25x25/1a3a5f/ffffff?text=${prediction.homeTeam.substring(0,2)}'">
+                            ${prediction.homeTeam} vs 
+                            <img src="${getTeamLogo(prediction.awayTeam)}" class="team-logo ms-1 me-1" alt="${prediction.awayTeam}" onerror="this.src='https://via.placeholder.com/25x25/2a5a8c/ffffff?text=${prediction.awayTeam.substring(0,2)}'">
+                            ${prediction.awayTeam}
+                        </div>
+                    </td>
+                    <td>${prediction.league}</td>
+                    <td>${new Date(prediction.date).toLocaleString()}</td>
+                    <td>
+                        <span class="prediction-badge ${getPredictionBadgeClass(prediction.prediction)}">
+                            ${prediction.prediction}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar ${getConfidenceClass(prediction.confidence)}" style="width: ${prediction.confidence}%"></div>
+                        </div>
+                        <small>${prediction.confidence}%</small>
+                    </td>
+                    <td>
+                        <span class="prediction-badge ${prediction.btts === 'Yes' ? 'win-badge' : 'loss-badge'}">
+                            ${prediction.btts}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <span class="prediction-badge ${prediction.prediction === 'Home Win' ? 'win-badge' : 'loss-badge'} me-1">${prediction.homeOdds}</span>
+                            <span class="prediction-badge ${prediction.prediction === 'Draw' ? 'draw-badge' : 'loss-badge'} me-1">${prediction.drawOdds}</span>
+                            <span class="prediction-badge ${prediction.prediction === 'Away Win' ? 'win-badge' : 'loss-badge'}">${prediction.awayOdds}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${prediction.status === 'Pending' ? 'bg-warning' : prediction.status === 'Correct' ? 'bg-success' : 'bg-danger'}">
+                            ${prediction.status}
+                        </span>
+                    </td>
+                `;
+                predictionsTable.appendChild(row);
+            });
+        }
+
+        function getTeamLogo(teamName) {
+            const team = appState.teams.find(t => t.name === teamName);
+            return team ? team.logo : `https://via.placeholder.com/25x25/1a3a5f/ffffff?text=${teamName.substring(0,2)}`;
+        }
+
+        function getPredictionBadgeClass(prediction) {
+            switch(prediction) {
+                case 'Home Win':
+                case 'Away Win':
+                    return 'win-badge';
+                case 'Draw':
+                    return 'draw-badge';
+                default:
+                    return 'loss-badge';
+            }
+        }
+
+        function getConfidenceClass(confidence) {
+            if (confidence >= 80) return 'bg-success';
+            if (confidence >= 60) return 'bg-warning';
+            return 'bg-danger';
+        }
+
+        function addMatchPrediction(homeTeam, awayTeam, league, date) {
+            // Generate a random prediction (in a real app, this would use AI)
+            const outcomes = ['Home Win', 'Away Win', 'Draw'];
+            const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+            const confidence = Math.floor(Math.random() * 30) + 60; // 60-90%
+            const btts = Math.random() > 0.5 ? 'Yes' : 'No';
+            
+            // Generate realistic odds based on prediction
+            let homeOdds, drawOdds, awayOdds;
+            if (randomOutcome === 'Home Win') {
+                homeOdds = (1.2 + Math.random() * 0.8).toFixed(2);
+                drawOdds = (3.0 + Math.random() * 1.5).toFixed(2);
+                awayOdds = (4.0 + Math.random() * 2.0).toFixed(2);
+            } else if (randomOutcome === 'Away Win') {
+                homeOdds = (4.0 + Math.random() * 2.0).toFixed(2);
+                drawOdds = (3.0 + Math.random() * 1.5).toFixed(2);
+                awayOdds = (1.2 + Math.random() * 0.8).toFixed(2);
+            } else {
+                homeOdds = (2.5 + Math.random() * 1.5).toFixed(2);
+                drawOdds = (2.0 + Math.random() * 1.0).toFixed(2);
+                awayOdds = (2.5 + Math.random() * 1.5).toFixed(2);
+            }
+            
+            const newPrediction = {
+                id: Date.now(),
+                homeTeam: homeTeam,
+                awayTeam: awayTeam,
+                league: league,
+                date: date,
+                prediction: randomOutcome,
+                confidence: confidence,
+                btts: btts,
+                homeOdds: parseFloat(homeOdds),
+                drawOdds: parseFloat(drawOdds),
+                awayOdds: parseFloat(awayOdds),
+                status: 'Pending'
+            };
+            
+            // Add to predictions array
+            appState.predictions.push(newPrediction);
+            
+            // Save to localStorage
+            localStorage.setItem('predictions', JSON.stringify(appState.predictions));
+            
+            // Update UI
+            renderPredictionsTable();
+            
+            // Show success message
+            showNotification(`Prediction for ${homeTeam} vs ${awayTeam} generated successfully!`, 'success');
+        }
+
+        // Refresh data function
+        function refreshData() {
+            // Show loading state
+            const refreshBtn = document.getElementById('refreshDataBtn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
+            refreshBtn.disabled = true;
+            
+            // Simulate API calls to refresh data
+            setTimeout(() => {
+                // Update last refresh time
+                appState.lastRefresh = new Date();
+                document.getElementById('lastRefreshTime').textContent = 'Just now';
+                
+                // Restore button state
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                
+                // Show success message
+                showNotification('Data refreshed successfully!', 'success');
+                
+                // In a real app, you would update the predictions and teams from APIs here
+            }, 2000);
+        }
+
+        // Auto-refresh setup
+        function setupAutoRefresh() {
+            const autoRefreshCheckbox = document.getElementById('autoRefresh');
+            const refreshIntervalSelect = document.getElementById('refreshInterval');
+            
+            let refreshInterval;
+            
+            function startAutoRefresh() {
+                const interval = parseInt(refreshIntervalSelect.value) * 60 * 1000; // Convert to milliseconds
+                refreshInterval = setInterval(refreshData, interval);
+            }
+            
+            function stopAutoRefresh() {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+            }
+            
+            autoRefreshCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+            
+            refreshIntervalSelect.addEventListener('change', function() {
+                if (autoRefreshCheckbox.checked) {
+                    stopAutoRefresh();
+                    startAutoRefresh();
+                }
+            });
+            
+            // Start auto-refresh if enabled
+            if (autoRefreshCheckbox.checked) {
+                startAutoRefresh();
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        // Chart initialization
+        function initializeCharts() {
+            // Performance over time chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            window.performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                    datasets: [{
+                        label: 'Prediction Accuracy (%)',
+                        data: [65, 68, 72, 70, 75, 78, 76, 80, 82, 78],
+                        borderColor: '#00c853',
+                        backgroundColor: 'rgba(0, 200, 83, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Prediction distribution chart
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            window.distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Home Wins', 'Away Wins', 'Draws'],
+                    datasets: [{
+                        data: [45, 30, 25],
+                        backgroundColor: [
+                            '#00c853',
+                            '#2a5a8c',
+                            '#ffab00'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Leagues performance chart
+            const leaguesCtx = document.getElementById('leaguesChart').getContext('2d');
+            window.leaguesChart = new Chart(leaguesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1'],
+                    datasets: [{
+                        label: 'Accuracy (%)',
+                        data: [82, 78, 75, 80, 72],
+                        backgroundColor: '#1a3a5f'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Monthly performance chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            window.monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                    datasets: [{
+                        label: 'Profit/Loss (%)',
+                        data: [5, 8, 12, 10, 15, 18, 14, 20, 22, 14],
+                        backgroundColor: [
+                            '#00c853', '#00c853', '#00c853', '#00c853', '#00c853',
+                            '#00c853', '#00c853', '#00c853', '#00c853', '#00c853'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // AI Model Performance Chart
+            const modelPerformanceCtx = document.getElementById('modelPerformanceChart').getContext('2d');
+            window.modelPerformanceChart = new Chart(modelPerformanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Epoch 1', 'Epoch 50', 'Epoch 100', 'Epoch 150', 'Epoch 200', 'Epoch 245'],
+                    datasets: [
+                        {
+                            label: 'Training Accuracy',
+                            data: [65, 72, 78, 82, 85, 87],
+                            borderColor: '#00c853',
+                            backgroundColor: 'rgba(0, 200, 83, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Validation Accuracy',
+                            data: [60, 68, 74, 78, 80, 82],
+                            borderColor: '#2a5a8c',
+                            backgroundColor: 'rgba(42, 90, 140, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAnalyticsCharts() {
+            // In a real app, you would update chart data with the latest analytics
+            // For now, we'll just ensure the charts are rendered properly
+            setTimeout(() => {
+                if (window.performanceChart) window.performanceChart.update();
+                if (window.distributionChart) window.distributionChart.update();
+                if (window.leaguesChart) window.leaguesChart.update();
+                if (window.monthlyChart) window.monthlyChart.update();
+            }, 100);
+        }
+    </script>
+</body>
+</html>
